@@ -1,52 +1,227 @@
-# PART 1
-# display a menu with at least 3 difficulty choices and ask the user
-# to select the desired level
-difficulty = "1" # sample data, normally the user should choose the difficulty
+import random
+import sys
+
+def split_lists():
+    f=list(open('countries-and-capitals.txt','r'))
+    all_countries=[]
+    all_capitals=[]
+    for n in f:
+        all_countries.append(n.split("|")[0])
+        all_capitals.append(n.split("|")[1])
+    countries_list= [[] for _ in range(3)]
+    capitals_list = [[] for _ in range(3)]
+    for m in all_countries:
+        if len(m) <= 7:
+            countries_list[0].append(m)
+        elif len(m) <= 10:
+            countries_list[1].append(m)
+        else:
+            countries_list[2].append(m)
+    for i in all_capitals:
+        if len(i) <= 7:
+            capitals_list[0].append(i.rstrip())
+        elif len(i) <=10:
+            capitals_list[1].append(i.rstrip())
+        else:
+            capitals_list[2].append(i.rstrip())
+
+    return (countries_list, capitals_list)
+    
+
+def difficulty():
+    good_input_theme = False
+    good_input_diff = False
+    while good_input_theme is False:
+        choice_theme = input("Please choose if you want countries or capitals (co/ca):  ")
+        if choice_theme == "co" or choice_theme == "ca":
+            good_input_theme = True
+            while good_input_diff is False:
+                print("Easy: 1 Medium: 2, Hard: 3")
+                choice_diff = input("Please choose a difficulty level: ")
+                if choice_diff == "1" or choice_diff == "2" or choice_diff == "3": 
+                        good_input_diff = True
+                else:
+                    print("You can chose 1, 2 or 3")
+        else:
+            print("You can chose 'co' or 'ca'")
+    return choice_theme, int(choice_diff)
+    
+
+def word_to_guess(theme, diff):
+    countries, capitals = split_lists()
+    if theme == "co":
+        return random.choice(countries[diff-1])
+    return random.choice(capitals[diff-1])
+    
+
+def start_lives(choice_diff):
+    lives = 0
+    if choice_diff == 1:
+        lives += 7
+        start_lives_1 = lives
+        print(f'Lives: {lives}')
+    elif choice_diff == 2:
+        lives += 6
+        start_lives_1 = lives
+        print(f'Lives: {lives}')
+    elif choice_diff == 3:
+        lives += 5
+        start_lives_1 = lives
+        print(f'Lives: {lives}')
+    return lives, start_lives_1
+    
+
+def replace(word):
+    secret_word = ""
+    num_letters = len(word)
+    for letter in word:
+        if letter == " ":
+            secret_word += "  "
+        elif letter == "-":
+            secret_word += "-"
+        else:
+            secret_word += "_ "
+    return secret_word
 
 
-# STEP 2
-# based on the chosen difficulty level, set the values 
-# for the player's lives
-word_to_guess = "Cairo" # sample data, normally the word should be chosen from the countries-and-capitals.txt
-lives = 5 # sample data, normally the lives should be chosen based on the difficulty
+def letter_input(): 
+    good_input = False
+    letter = ""
+    while good_input is False:
+        letter = input("Guess a letter or type 'quit' to exit the game: ")
+        if letter.isalpha() == True and len(letter) == 1:
+            good_input = True
+        else:
+            if letter == "quit":
+                print("Thanks for playing! Bye!")
+                sys.exit()
+            print("Try a letter!")
+    return letter
+
+def check_letter(letter, word):
+    if not letter in word.lower():
+        print("This letter is not in the word :(")
+        return False
+    
+
+def letter_replace(word, letter_list, secret_word, letter):
+    index=[]
+    word=word.lower()
+    for x in range(len(word)):
+        if word[x] == letter:
+            index.append(x*2)
+    for y in range(len(secret_word)):
+        for z in index:
+            if y == z:
+                if not y == 2:
+                    s= list(secret_word)
+                    s[y] = letter
+                    secret_word= "".join(s)
+                else:
+                    s= list(secret_word)
+                    s[y] = letter.upper()
+                    secret_word= "".join(s)
+
+    return letter_list, secret_word
 
 
-# STEP 3
-# display the chosen word to guess with all letters replaced by "_"
-# for example instead of "Cairo" display "_ _ _ _ _"
+def tried_letter(letter_list, letter):
+    if letter in letter_list:
+        print("You've already tried this letter")
+        pass
+    else:
+        if letter.isalpha() and len(letter) == 1:
+            letter_list.append(letter)
+    return(f"You've already tried these letters: {letter_list}")
+    
+
+def lose_life(lives):
+    lives -= 1
+    return lives
 
 
-# STEP 4
-# ask the user to type a letter
-# here you should validate if the typed letter is the word 
-# "quit", "Quit", "QUit", "QUIt", "QUIT", "QuIT"... you get the idea :)
-# HINT: use the upper() or lower() built-in Python functions
+def draw_hangman(lives, start_lives, hangman):
+    while lives > (start_lives-3):
+        hangman = "   |  \n   |  \n" + hangman
+        return hangman
+    if lives == 3:
+        hangman = "    _____ \n" + hangman
+        return hangman
+    if lives == 2:
+        hangman = '''   _____
+  |     |
+  |     |
+  |     |
+  |  
+  |  
+  |  
+__|__
+'''
+        return hangman
+    if lives == 1:
+        hangman = '''   _____
+  |     |
+  |     |
+  |     |
+  |     O
+  |  
+  |  
+__|__
+'''
+
+        return hangman
+    if lives == 0:
+        hangman = ("   _____ \n"
+                   "  |     | \n"
+                   "  |     |\n"
+                   "  |     | \n"
+                   "  |     O \n"
+                   "  |    /|\ \n"
+                   "  |    / \ \n"
+                   "__|__\n")
+
+        return hangman       
+        
+
+def win(secret_word):
+    if "_" in list(secret_word):
+        return False
+    else:
+        win_message = "You won!"
+        return win_message
 
 
-# STEP 5
-# validate if the typed letter is already in the tried letters
-# HINT: search on the internet: `python if letter in list`
-# If it is not, than append to the tried letters
-# If it has already been typed, return to STEP 5. HINT: use a while loop here
-already_tried_letters = [] # this list will contain all the tried letters
+def lose(lives, word):
+    if lives == 0:
+        lose_message = f"Game over! The word was: {word}"
+        return lose_message
 
 
-# STEP 6
-# if the letter is present in the word iterate through all the letters in the variable
-# word_to_guess. If that letter is present in the already_tried_letters then display it,
-# otherwise display "_".
-
-
-# if the letter is not present in the word decrease the value in the lives variable
-# and display a hangman ASCII art. You can search the Internet for "hangman ASCII art",
-# or draw a new beautiful one on your own.
-
-
-
-# STEP 7
-# check if the variable already_tried_letters already contains all the letters necessary
-# to build the value in the variable word_to_guess. If so display a winning message and exit
-# the app.
-# If you still have letters that are not guessed check if you have a non negative amount of lives
-# left. If not print a loosing message and exit the app.
-# If neither of the 2 conditions mentioned above go back to STEP 4
+def main():
+    split_lists()
+    choice_theme, choice_diff = difficulty()
+    word = word_to_guess(choice_theme, choice_diff)
+    lives, start_lives_1 = start_lives(choice_diff)
+    secret_word = replace(word)
+    print(secret_word)
+    letter_list = []
+    hangman=" __|__"
+    while win(secret_word) is False:
+        letter = letter_input()
+        check_letter_fun = check_letter(letter, word)
+        if check_letter_fun is False:
+            lives = lose_life(lives)
+            hangman = (draw_hangman(lives,start_lives_1, hangman))
+            print(hangman)
+        letter_replace_list, secret_word = letter_replace(word, letter_list, secret_word, letter)
+        print(secret_word)
+        print(f"lives: {lives}")
+        already_tried_letter = tried_letter(letter_list, letter)
+        print(already_tried_letter)
+        if lose(lives, word):
+            print(lose(lives, word))
+            break  
+    if not lose(lives, word):
+        print(win(secret_word))
+       
+main()
