@@ -1,4 +1,5 @@
 import random
+import sys
 
 def split_lists():
     f=list(open('countries-and-capitals.txt','r'))
@@ -28,10 +29,22 @@ def split_lists():
     
 
 def difficulty():
-    choice_theme = input("Please choose if you want countries or capitals (co/ca):  ")
-    print("Easy: 1 Medium: 2, Hard: 3")
-    choice_diff = int(input("Please choose a difficulty level: "))
-    return choice_theme, choice_diff
+    good_input_theme = False
+    good_input_diff = False
+    while good_input_theme is False:
+        choice_theme = input("Please choose if you want countries or capitals (co/ca):  ")
+        if choice_theme == "co" or choice_theme == "ca":
+            good_input_theme = True
+            while good_input_diff is False:
+                print("Easy: 1 Medium: 2, Hard: 3")
+                choice_diff = input("Please choose a difficulty level: ")
+                if choice_diff == "1" or choice_diff == "2" or choice_diff == "3": 
+                        good_input_diff = True
+                else:
+                    print("You can chose 1, 2 or 3")
+        else:
+            print("You can chose 'co' or 'ca'")
+    return choice_theme, int(choice_diff)
     
 
 def word_to_guess(theme, diff):
@@ -45,14 +58,17 @@ def start_lives(choice_diff):
     lives = 0
     if choice_diff == 1:
         lives += 7
+        start_lives_1 = lives
         print(f'Lives: {lives}')
     elif choice_diff == 2:
         lives += 6
+        start_lives_1 = lives
         print(f'Lives: {lives}')
     elif choice_diff == 3:
         lives += 5
+        start_lives_1 = lives
         print(f'Lives: {lives}')
-    return lives
+    return lives, start_lives_1
     
 
 def replace(word):
@@ -68,19 +84,25 @@ def replace(word):
     return secret_word
 
 
-def letter_input():
-    letter = input("Guess a letter: ")
-    return letter.lower()
-
+def letter_input(): 
+    good_input = False
+    letter = ""
+    while good_input is False:
+        letter = input("Guess a letter or type 'quit' to exit the game: ")
+        if letter.isalpha() == True and len(letter) == 1:
+            good_input = True
+        else:
+            if letter == "quit":
+                print("Thanks for playing! Bye!")
+                sys.exit()
+            print("Try a letter!")
+    return letter
 
 def check_letter(letter, word):
     if not letter in word.lower():
         print("This letter is not in the word :(")
         return False
-    if letter == "quit":
-        print("Thanks for playing! Bye!")
-        exit
-
+    
 
 def letter_replace(word, letter_list, secret_word, letter):
     index=[]
@@ -103,12 +125,13 @@ def letter_replace(word, letter_list, secret_word, letter):
     return letter_list, secret_word
 
 
-def tried_letter(letter_list,letter):
+def tried_letter(letter_list, letter):
     if letter in letter_list:
         print("You've already tried this letter")
         pass
     else:
-        letter_list.append(letter)
+        if letter.isalpha() and len(letter) == 1:
+            letter_list.append(letter)
     return(f"You've already tried these letters: {letter_list}")
     
 
@@ -116,17 +139,50 @@ def lose_life(lives):
     lives -= 1
     return lives
 
-def draw_hangman(lives):
-    if lives == 6:
-    hangman =    ("   _____ \n"
-                  "  |     | \n"
-                  "  |     |\n"
-                  "  |     | \n"
-                  "  |     O \n"
-                  "  |    /|\ \n"
-                  "  |    / \ \n"
-                  "__|__\n")
-    
+
+def draw_hangman(lives, start_lives, hangman):
+    while lives > (start_lives-3):
+        hangman = "   |  \n   |  \n" + hangman
+        return hangman
+    if lives == 3:
+        hangman = "    _____ \n" + hangman
+        return hangman
+    if lives == 2:
+        hangman = '''   _____
+  |     |
+  |     |
+  |     |
+  |  
+  |  
+  |  
+__|__
+'''
+        return hangman
+    if lives == 1:
+        hangman = '''   _____
+  |     |
+  |     |
+  |     |
+  |     O
+  |  
+  |  
+__|__
+'''
+
+        return hangman
+    if lives == 0:
+        hangman = ("   _____ \n"
+                   "  |     | \n"
+                   "  |     |\n"
+                   "  |     | \n"
+                   "  |     O \n"
+                   "  |    /|\ \n"
+                   "  |    / \ \n"
+                   "__|__\n")
+
+        return hangman       
+        
+
 def win(secret_word):
     if "_" in list(secret_word):
         return False
@@ -134,54 +190,38 @@ def win(secret_word):
         win_message = "You won!"
         return win_message
 
-def lose(lives):
+
+def lose(lives, word):
     if lives == 0:
-        lose_message = "Game over!"
+        lose_message = f"Game over! The word was: {word}"
         return lose_message
 
-# if the letter is not present in the word decrease the value in the lives variable
-# and display a hangman ASCII art. You can search the Internet for "hangman ASCII art",
-# or draw a new beautiful one on your own.
 
 def main():
     split_lists()
     choice_theme, choice_diff = difficulty()
     word = word_to_guess(choice_theme, choice_diff)
-    print(word)
-    lives = start_lives(choice_diff)
+    lives, start_lives_1 = start_lives(choice_diff)
     secret_word = replace(word)
     print(secret_word)
     letter_list = []
+    hangman=" __|__"
     while win(secret_word) is False:
         letter = letter_input()
         check_letter_fun = check_letter(letter, word)
         if check_letter_fun is False:
             lives = lose_life(lives)
+            hangman = (draw_hangman(lives,start_lives_1, hangman))
+            print(hangman)
         letter_replace_list, secret_word = letter_replace(word, letter_list, secret_word, letter)
         print(secret_word)
         print(f"lives: {lives}")
-        print(draw_hangman(lives))
-        already_tried_letter = tried_letter(letter_list,letter)
+        already_tried_letter = tried_letter(letter_list, letter)
         print(already_tried_letter)
-        if lose(lives):
-            print(lose(lives))
+        if lose(lives, word):
+            print(lose(lives, word))
             break  
-    if not lose(lives):
+    if not lose(lives, word):
         print(win(secret_word))
        
 main()
-
-
-        # elif count == 5:
-        #     time.sleep(1)
-        #     print("   _____ \n"
-        #           "  |     | \n"
-        #           "  |     |\n"
-        #           "  |     | \n"
-        #           "  |     O \n"
-        #           "  |    /|\ \n"
-        #           "  |    / \ \n"
-        #           "__|__\n")
-        #     print("Wrong guess. You are hanged!!!\n")
-        #     print("The word was:",already_guessed,word)
-        #     play_loop()
