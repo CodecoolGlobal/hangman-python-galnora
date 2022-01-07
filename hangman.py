@@ -33,12 +33,18 @@ def difficulty():
     good_input_theme = False
     good_input_diff = False
     while good_input_theme is False:
-        choice_theme = input("Please choose if you want countries or capitals (co/ca):  ")
+        choice_theme = input("Please choose if you want countries or capitals (co/ca)  \n (If you want to exit type quit) \n")
+        if choice_theme == "quit":
+            print("Bye!")
+            sys.exit()
         if choice_theme == "co" or choice_theme == "ca":
             good_input_theme = True
             while good_input_diff is False:
                 print("Easy: 1 Medium: 2, Hard: 3")
-                choice_diff = input("Please choose a difficulty level: ")
+                choice_diff = input("Please choose a difficulty level \n (If you want to exit type quit) \n")
+                if choice_diff == "quit":
+                    print("Bye!")
+                    sys.exit()
                 if choice_diff == "1" or choice_diff == "2" or choice_diff == "3": 
                         good_input_diff = True
                 else:
@@ -139,7 +145,7 @@ def tried_letter(letter_list, letter):
 def lose_life(lives):
     lives -= 1
     return lives
-         
+     
 
 def win(secret_word):
     if "_" in list(secret_word):
