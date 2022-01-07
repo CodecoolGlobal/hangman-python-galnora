@@ -105,7 +105,9 @@ def letter_input():
             print("Try a letter!")
     return letter
 
-def check_letter(letter, word):
+def check_letter(letter, word, letter_list):
+    if letter in letter_list:
+        return True
     if not letter in word.lower():
         print("\033[1;31m This letter is not in the word :( \n")
         return False
@@ -113,6 +115,7 @@ def check_letter(letter, word):
 
 def letter_replace(word, letter_list, secret_word, letter):
     index=[]
+    origin_word = list(word)
     word=word.lower()
     for x in range(len(word)):
         if word[x] == letter:
@@ -134,8 +137,7 @@ def letter_replace(word, letter_list, secret_word, letter):
 
 def tried_letter(letter_list, letter):
     if letter in letter_list:
-        print(f"You've already tried this letter: {letter} \n")
-        pass
+        print(f"\033[1;31m You've already tried this letter: {letter} \033[0;0m\n")
     else:
         if letter.isalpha() and len(letter) == 1:
             letter_list.append(letter)
@@ -174,7 +176,7 @@ def main():
     while win(secret_word) is False:
         letter = letter_input()
         print('\n'f"Your guess is: {letter}"'\n')
-        check_letter_fun = check_letter(letter, word)
+        check_letter_fun = check_letter(letter, word, letter_list)
         if check_letter_fun is False:
             lives = lose_life(lives)
             hangman = (draw_hangman(lives,start_lives_1, hangman))
