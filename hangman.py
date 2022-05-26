@@ -33,17 +33,17 @@ def difficulty():
     good_input_theme = False
     good_input_diff = False
     while good_input_theme is False:
-        choice_theme = input("Please choose if you want countries or capitals (co/ca)  \n (If you want to exit type quit) \n")
+        choice_theme = input("Please choose if you want countries or capitals (co/ca)  \n \033[1;31m (If you want to exit type quit) \033[0;0m \n")
         if choice_theme == "quit":
-            print("Bye!")
+            print("\033[1;33m Bye!")
             sys.exit()
         if choice_theme == "co" or choice_theme == "ca":
             good_input_theme = True
             while good_input_diff is False:
                 print("Easy: 1 Medium: 2, Hard: 3")
-                choice_diff = input("Please choose a difficulty level \n (If you want to exit type quit) \n")
+                choice_diff = input("Please choose a difficulty level \n \033[1;31m (If you want to exit type quit) \033[0;0m \n")
                 if choice_diff == "quit":
-                    print("Bye!")
+                    print("\033[1;33m Bye!")
                     sys.exit()
                 if choice_diff == "1" or choice_diff == "2" or choice_diff == "3": 
                         good_input_diff = True
@@ -95,24 +95,27 @@ def letter_input():
     good_input = False
     letter = ""
     while good_input is False:
-        letter = input("Guess a letter or type 'quit' to exit the game: ")
+        letter = input("Guess a letter \n \033[1;31m (or type 'quit' to exit the game) \033[0;0m \n")
         if letter.isalpha() == True and len(letter) == 1:
             good_input = True
         else:
             if letter == "quit":
-                print("Thanks for playing! Bye!")
+                print("\033[1;33m Thanks for playing! Bye!")
                 sys.exit()
             print("Try a letter!")
     return letter
 
-def check_letter(letter, word):
+def check_letter(letter, word, letter_list):
+    if letter in letter_list:
+        return True
     if not letter in word.lower():
-        print("This letter is not in the word :(")
+        print("\033[1;31m This letter is not in the word :( \n")
         return False
     
 
 def letter_replace(word, letter_list, secret_word, letter):
     index=[]
+    origin_word = list(word)
     word=word.lower()
     for x in range(len(word)):
         if word[x] == letter:
@@ -134,12 +137,11 @@ def letter_replace(word, letter_list, secret_word, letter):
 
 def tried_letter(letter_list, letter):
     if letter in letter_list:
-        print(f"You've already tried this letter: {letter}")
-        pass
+        print(f"\033[1;31m You've already tried this letter: {letter} \033[0;0m\n")
     else:
         if letter.isalpha() and len(letter) == 1:
             letter_list.append(letter)
-    return(f"You've already tried these letters: {letter_list} \n"  )
+    return(f"You've already tried these letters: \033[1;36m  {letter_list} \033[0;0m \n"  )
     
 
 def lose_life(lives):
@@ -151,13 +153,13 @@ def win(secret_word):
     if "_" in list(secret_word):
         return False
     else:
-        win_message = "You won!"
+        win_message = "\033[0;32m Congrats! You won! \n"
         return win_message
 
 
 def lose(lives, word):
     if lives == 0:
-        lose_message = f"Game over! The word was: {word}"
+        lose_message =  f"\033[1;31m Game over! The word was: {word} \n"
         return lose_message
 
 
@@ -170,18 +172,18 @@ def main():
     secret_word = replace(word)
     print(secret_word)
     letter_list = []
-    hangman=" __|__"
+    hangman="\033[1;34m __|__\033[0;0m"
     while win(secret_word) is False:
         letter = letter_input()
         print('\n'f"Your guess is: {letter}"'\n')
-        check_letter_fun = check_letter(letter, word)
+        check_letter_fun = check_letter(letter, word, letter_list)
         if check_letter_fun is False:
             lives = lose_life(lives)
             hangman = (draw_hangman(lives,start_lives_1, hangman))
             print(hangman)
         letter_replace_list, secret_word = letter_replace(word, letter_list, secret_word, letter)
         print(secret_word)
-        print(f"lives: {lives}")
+        print(f"\033[1;35;40m lives: {lives} \033[0;0m")
         already_tried_letter = tried_letter(letter_list, letter)
         print(already_tried_letter)
         if lose(lives, word):
